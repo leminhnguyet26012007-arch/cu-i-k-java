@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gửi phản hồi / Đơn từ | Sinh viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Form Section -->
+        <div class="bg-white rounded-lg shadow p-6 h-fit">
+            <h2 class="text-xl font-bold mb-4 text-slate-800">Gửi đơn / Phản hồi mới</h2>
+            <form th:action="@{/student/feedback/save}" th:object="${newFeedback}" method="post" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Loại đơn</label>
+                    <select th:field="*{loaiDon}"
+                        class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="Đơn xin nghỉ học">Đơn xin nghỉ học</option>
+                        <option value="Đơn xin xác nhận">Đơn xin xác nhận sinh viên</option>
+                        <option value="Phản hồi chất lượng">Phản hồi chất lượng giảng dạy</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tiêu đề</label>
+                    <input type="text" th:field="*{tieuDe}"
+                        class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nội dung chi tiết</label>
+                    <textarea th:field="*{noiDung}" rows="5"
+                        class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                        required></textarea>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <a th:href="@{/student/dashboard}"
+                        class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded mr-2">Quay lại</a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Gửi
+                        đơn</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- List Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4 text-slate-800">Lịch sử gửi đơn</h2>
+            <div class="space-y-4">
+                <div th:each="item : ${feedbacks}" class="border-b border-slate-100 pb-4 last:border-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="font-bold text-slate-700" th:text="${item.loaiDon}">Loại đơn</span>
+                        <span class="text-xs text-slate-500"
+                            th:text="${#temporals.format(item.ngayGui, 'dd/MM/yyyy HH:mm')}">Time</span>
+                    </div>
+                    <p class="font-medium text-blue-600 text-sm mb-1" th:text="${item.tieuDe}">Tiêu đề</p>
+                    <p class="text-slate-600 text-sm mb-2" th:text="${item.noiDung}">Nội dung...</p>
+                    <div>
+                        <span th:if="${item.trangThai == 'Chờ xử lý'}"
+                            class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">Chờ xử lý</span>
+                        <span th:if="${item.trangThai == 'Đã duyệt'}"
+                            class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">Đã duyệt</span>
+                        <span th:if="${item.trangThai == 'Từ chối'}"
+                            class="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">Từ chối</span>
+                    </div>
+                </div>
+                <div th:if="${feedbacks == null || feedbacks.empty}" class="text-center text-slate-400 py-8">
+                    Bạn chưa gửi đơn nào.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

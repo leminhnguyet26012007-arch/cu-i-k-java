@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thời khóa biểu | Sinh viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">Thời khóa biểu</h2>
+            <a th:href="@{/student/dashboard}" class="text-blue-600 hover:text-blue-800">Quay lại Dashboard</a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-100 border-b border-slate-200">
+                    <tr>
+                        <th class="p-4 font-semibold text-slate-600">Mã Lớp</th>
+                        <th class="p-4 font-semibold text-slate-600">Môn học</th>
+                        <th class="p-4 font-semibold text-slate-600">Giảng viên</th>
+                        <th class="p-4 font-semibold text-slate-600">Phòng học</th>
+                        <th class="p-4 font-semibold text-slate-600">Lịch học</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="dk : ${schedule}" class="hover:bg-slate-50">
+                        <td class="p-4 font-medium" th:text="${dk.lopHocPhan.maLhp}">IT001.1</td>
+                        <td class="p-4" th:text="${dk.lopHocPhan.monHoc.tenMH}">Lập trình Java</td>
+                        <td class="p-4"
+                            th:text="${dk.lopHocPhan.giangVien != null ? dk.lopHocPhan.giangVien.hoTen : 'Chưa phân công'}">
+                            GV A</td>
+                        <td class="p-4" th:text="${dk.lopHocPhan.phongHoc}">A2-101</td>
+                        <td class="p-4 font-bold text-blue-600" th:text="${dk.lopHocPhan.lichHoc}">T2, 7-9</td>
+                    </tr>
+                    <tr th:if="${schedule == null || schedule.empty}">
+                        <td colspan="5" class="p-8 text-center text-slate-500">Bạn chưa đăng ký môn học nào.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

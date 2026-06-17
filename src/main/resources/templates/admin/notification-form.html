@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo thông báo | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold mb-6 text-slate-800">Tạo thông báo mới</h2>
+
+        <form th:action="@{/admin/notifications/save}" th:object="${notification}" method="post" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tiêu đề</label>
+                <input type="text" th:field="*{tieuDe}"
+                    class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Đối tượng nhận</label>
+                <select th:field="*{doiTuong}"
+                    class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500">
+                    <option value="ALL">Tất cả</option>
+                    <option value="SINH_VIEN">Sinh viên</option>
+                    <option value="GIANG_VIEN">Giảng viên</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nội dung</label>
+                <textarea th:field="*{noiDung}" rows="6"
+                    class="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                    required></textarea>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                <a th:href="@{/admin/dashboard}"
+                    class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded mr-2">Hủy</a>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Đăng thông
+                    báo</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
