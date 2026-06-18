@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.ThongBao;
 import com.example.dean12.model.User;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,7 +20,7 @@ public class AdminAdvancedScenes {
         Label title = new Label("Cấu hình Hệ thống");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
-        String[] current = navigator.getDao().getSystemConfig(); // [Year, Semester, Tuition]
+        String[] current = navigator.getAdminController().getSystemConfig(); // [Year, Semester, Tuition]
 
         GridPane grid = new GridPane();
         grid.setHgap(15);
@@ -52,7 +52,7 @@ public class AdminAdvancedScenes {
                 double t = Double.parseDouble(txtTuition.getText());
                 if (t < 0) throw new NumberFormatException();
                 
-                navigator.getDao().updateSystemConfig(txtYear.getText(), cbSem.getValue(), t);
+                navigator.getAdminController().updateSystemConfig(txtYear.getText(), cbSem.getValue(), t);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật cấu hình hệ thống!");
             } catch (NumberFormatException ex) {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Học phí phải là một số dương!");
@@ -113,7 +113,7 @@ public class AdminAdvancedScenes {
                 return;
             }
 
-            navigator.getDao().createNotification(txtTitle.getText(), txtContent.getText(), roleCode);
+            navigator.getAdminController().createNotification(txtTitle.getText(), txtContent.getText(), roleCode);
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi thông báo đến các đối tượng!");
             txtTitle.clear();
             txtContent.clear();
@@ -150,14 +150,14 @@ public class AdminAdvancedScenes {
 
         Button btnRefresh = new Button("🔄 Làm mới lịch sử");
         btnRefresh.getStyleClass().add("btn-primary");
-        btnRefresh.setOnAction(e -> table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllNotifications())));
+        btnRefresh.setOnAction(e -> table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllNotifications())));
 
         vHistory.getChildren().addAll(btnRefresh, table);
         tabHistory.setContent(vHistory);
 
         tabHistory.setOnSelectionChanged(e -> {
             if (tabHistory.isSelected()) {
-                table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllNotifications()));
+                table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllNotifications()));
             }
         });
 
@@ -170,13 +170,13 @@ public class AdminAdvancedScenes {
         VBox root = new VBox(20);
         root.setPadding(new Insets(10, 0, 10, 0));
 
-        int studentCount = navigator.getDao().getAllStudents().size();
-        int courseCount = navigator.getDao().getAllCourses().size();
-        int classCount = navigator.getDao().getAllClasses().size();
+        int studentCount = navigator.getAdminController().getAllStudents().size();
+        int courseCount = navigator.getAdminController().getAllCourses().size();
+        int classCount = navigator.getAdminController().getAllClasses().size();
         
         // Calculate tuition statistics
         int paidCount = 0;
-        for (com.example.dean12.model.SinhVien sv : navigator.getDao().getAllStudents()) {
+        for (com.example.dean12.model.SinhVien sv : navigator.getAdminController().getAllStudents()) {
             if (sv.isTuitionPaid()) paidCount++;
         }
 
@@ -238,7 +238,7 @@ public class AdminAdvancedScenes {
 
         TableColumn<User, String> colStatus = new TableColumn<>("Trạng thái");
         colStatus.setCellValueFactory(c -> {
-            boolean locked = navigator.getDao().isUserLocked(c.getValue().getUsername());
+            boolean locked = navigator.getAdminController().isUserLocked(c.getValue().getUsername());
             return new SimpleStringProperty(locked ? "🔒 Đã khóa" : "✅ Hoạt động");
         });
         colStatus.setPrefWidth(120);
@@ -265,14 +265,14 @@ public class AdminAdvancedScenes {
                          showAlert(Alert.AlertType.WARNING, "Lỗi", "Không thể khóa tài khoản ADMIN!");
                          return;
                     }
-                    navigator.getDao().lockUserAccount(u.getUsername());
+                    navigator.getAdminController().lockUserAccount(u.getUsername());
                     refreshTable();
                     showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã khóa tài khoản: " + u.getUsername());
                 });
 
                 btnUnlock.setOnAction(e -> {
                     User u = getTableView().getItems().get(getIndex());
-                    navigator.getDao().unlockUserAccount(u.getUsername());
+                    navigator.getAdminController().unlockUserAccount(u.getUsername());
                     refreshTable();
                     showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã mở khóa tài khoản: " + u.getUsername());
                 });
@@ -289,7 +289,7 @@ public class AdminAdvancedScenes {
                     alert.getDialogPane().getStylesheets().add(AdminAdvancedScenes.class.getResource("/com/example/dean12/desktop/style.css").toExternalForm());
                     Optional<ButtonType> res = alert.showAndWait();
                     if (res.isPresent() && res.get() == ButtonType.YES) {
-                        navigator.getDao().deleteUserAccount(u.getUsername());
+                        navigator.getAdminController().deleteUserAccount(u.getUsername());
                         refreshTable();
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa tài khoản!");
                     }
@@ -297,7 +297,7 @@ public class AdminAdvancedScenes {
             }
 
             private void refreshTable() {
-                table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllUsers()));
+                table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllUsers()));
             }
 
             @Override
@@ -314,7 +314,7 @@ public class AdminAdvancedScenes {
 
         table.getColumns().addAll(colUser, colPass, colEmail, colRole, colStatus, colAction);
         VBox.setVgrow(table, Priority.ALWAYS);
-        table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllUsers()));
+        table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllUsers()));
 
         // Add form
         Label addTitle = new Label("Tạo tài khoản mới:");
@@ -343,17 +343,17 @@ public class AdminAdvancedScenes {
             }
             
             // Check duplicates
-            for (User ex : navigator.getDao().getAllUsers()) {
+            for (User ex : navigator.getAdminController().getAllUsers()) {
                 if (ex.getUsername().equalsIgnoreCase(uname)) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Trùng Lặp", "Tên đăng nhập này đã tồn tại!");
                     return;
                 }
             }
 
-            navigator.getDao().createUserAccount(uname, pword, mail, role);
+            navigator.getAdminController().createUserAccount(uname, pword, mail, role);
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tạo tài khoản thành công!");
             txtUsername.clear(); txtPassword.clear(); txtEmail.clear(); cbRole.setValue(null);
-            table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllUsers()));
+            table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllUsers()));
         });
 
         HBox form = new HBox(8, txtUsername, txtPassword, txtEmail, cbRole, btnCreate);
@@ -361,7 +361,7 @@ public class AdminAdvancedScenes {
 
         Button btnRefresh = new Button("🔄 Làm mới danh sách");
         btnRefresh.getStyleClass().add("btn-primary");
-        btnRefresh.setOnAction(e -> table.setItems(FXCollections.observableArrayList(navigator.getDao().getAllUsers())));
+        btnRefresh.setOnAction(e -> table.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllUsers())));
 
         root.getChildren().addAll(title, btnRefresh, table, addTitle, form);
         return root;

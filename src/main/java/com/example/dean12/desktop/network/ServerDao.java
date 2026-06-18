@@ -396,7 +396,7 @@ public class ServerDao {
                 try (PreparedStatement psUser = conn.prepareStatement(sqlUser, Statement.RETURN_GENERATED_KEYS)) {
                     psUser.setString(1, username);
                     psUser.setString(2, com.example.dean12.desktop.PasswordUtil.encode(password));
-                    psUser.setString(3, sv.getEmail()); // plain text email for spring security web UI if needed
+                    psUser.setString(3, sv.getEmail());
                     psUser.executeUpdate();
                     try (ResultSet rs = psUser.getGeneratedKeys()) {
                         if (rs.next()) userId = rs.getLong(1);

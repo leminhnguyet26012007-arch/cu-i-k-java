@@ -3,7 +3,6 @@ echo ==========================================
 echo   QLSV CLIENT - JAVAFX DESKTOP
 echo ==========================================
 echo.
-echo Yeu cau: chay START_SERVER.bat truoc khi dang nhap.
 echo Dang mo JavaFX client...
 echo.
 set JAVA_HOME=C:\Program Files\Java\jdk-24

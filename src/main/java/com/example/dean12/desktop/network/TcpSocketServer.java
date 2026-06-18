@@ -2,6 +2,7 @@ package com.example.dean12.desktop.network;
 
 import com.example.dean12.model.*;
 import java.io.*;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -18,13 +19,13 @@ public class TcpSocketServer {
     private static boolean running = false;
     private static final ServerDao dao = new ServerDao();
 
-    public static void start(int port) {
-        if (running) return;
-        running = true;
+    public static boolean start(int port) {
+        if (running) return true;
 
-        threadPool = Executors.newFixedThreadPool(15);
         try {
             serverSocket = new ServerSocket(port);
+            running = true;
+            threadPool = Executors.newFixedThreadPool(15);
             System.out.println("[TCP Server] Server listening on port " + port + "...");
 
             Thread schemaThread = new Thread(() -> {
@@ -47,11 +48,21 @@ public class TcpSocketServer {
                     System.err.println("[TCP Server] Accept error: " + e.getMessage());
                 }
             }
+        } catch (BindException e) {
+            running = false;
+            System.err.println("[TCP Server] Cannot start because port " + port + " is already in use.");
+            System.err.println("[TCP Server] Stop the old ServerMain process, or change server.port in config.properties.");
+            return false;
         } catch (IOException e) {
+            running = false;
             System.err.println("[TCP Server] Server socket creation failed: " + e.getMessage());
+            return false;
         } finally {
-            stop();
+            if (running) {
+                stop();
+            }
         }
+        return true;
     }
 
     public static void stop() {
@@ -132,7 +143,6 @@ public class TcpSocketServer {
                     <body style="font-family:Segoe UI,Arial;padding:32px">
                     <h2>QLSV TCP Socket Server is running</h2>
                     <p>Port 9000 is for the JavaFX desktop client, not for browser login.</p>
-                    <p>Open the web app at <a href="http://localhost:8081/login">http://localhost:8081/login</a>.</p>
                     <p>Open the desktop app with RUN_DESKTOP.bat or DesktopMain.</p>
                     </body>
                     </html>

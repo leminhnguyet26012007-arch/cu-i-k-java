@@ -9,7 +9,7 @@ public final class DatabaseSettings {
 
     private static final String JDBC_URL =
             "jdbc:h2:file:" + DB_DIR.replace('\\', '/') + "/school_db"
-                    + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL;AUTO_SERVER=TRUE";
+                    + ";MODE=PostgreSQL";
 
     static {
         new File(DB_DIR).mkdirs();

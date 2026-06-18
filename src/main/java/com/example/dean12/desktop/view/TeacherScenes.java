@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,7 +18,7 @@ import java.util.List;
 public class TeacherScenes {
 
     private static String resolveMaGV(SceneNavigator navigator, String username) {
-        GiangVien gv = navigator.getDao().getTeacherByUsername(username);
+        GiangVien gv = navigator.getTeacherController().getTeacherByUsername(username);
         if (gv != null) return gv.getMaGV();
         String u = username.toLowerCase();
         if (u.startsWith("gv")) return "GV" + u.substring(2).toUpperCase();
@@ -33,7 +33,7 @@ public class TeacherScenes {
         welcome.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
         String maGV = resolveMaGV(navigator, teacherUsername);
-        List<LopHocPhan> classes = navigator.getDao().getClassesByTeacher(maGV);
+        List<LopHocPhan> classes = navigator.getTeacherController().getClassesByTeacher(maGV);
 
         HBox stats = new HBox(20);
         stats.setAlignment(Pos.CENTER_LEFT);
@@ -59,7 +59,7 @@ public class TeacherScenes {
         Label title = new Label("QUẢN LÝ LỚP HỌC PHẦN");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
         String maGV = resolveMaGV(navigator, teacherUsername);
-        TableView<LopHocPhan> table = buildClassTable(navigator, navigator.getDao().getClassesByTeacher(maGV));
+        TableView<LopHocPhan> table = buildClassTable(navigator, navigator.getTeacherController().getClassesByTeacher(maGV));
         VBox.setVgrow(table, Priority.ALWAYS);
         content.getChildren().addAll(title, table);
         return content;
@@ -68,7 +68,7 @@ public class TeacherScenes {
     private static int countStudents(SceneNavigator navigator, List<LopHocPhan> classes) {
         int total = 0;
         for (LopHocPhan lhp : classes) {
-            total += navigator.getDao().getStudentsInClass(lhp.getId()).size();
+            total += navigator.getTeacherController().getStudentsInClass(lhp.getId()).size();
         }
         return total;
     }
@@ -166,7 +166,7 @@ public class TeacherScenes {
             {
                 cb.setOnAction(e -> {
                     DangKyHoc item = getTableView().getItems().get(getIndex());
-                    navigator.getDao().saveAttendance(lhp.getId(), item.getSinhVien().getMaSV(),
+                    navigator.getTeacherController().saveAttendance(lhp.getId(), item.getSinhVien().getMaSV(),
                             Date.valueOf(datePicker.getValue()), cb.isSelected());
                 });
             }
@@ -177,7 +177,7 @@ public class TeacherScenes {
             }
         });
         table.getColumns().addAll(colName, colCheck);
-        table.setItems(FXCollections.observableArrayList(navigator.getDao().getStudentsInClass(lhp.getId())));
+        table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getStudentsInClass(lhp.getId())));
 
         VBox center = new VBox(15, title, new HBox(10, new Label("Ngày:"), datePicker), table);
         VBox.setVgrow(table, Priority.ALWAYS);
@@ -193,7 +193,7 @@ public class TeacherScenes {
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
         String maGV = resolveMaGV(navigator, teacherUsername);
-        List<LopHocPhan> classes = navigator.getDao().getClassesByTeacher(maGV);
+        List<LopHocPhan> classes = navigator.getTeacherController().getClassesByTeacher(maGV);
 
         ComboBox<LopHocPhan> cbClass = new ComboBox<>(FXCollections.observableArrayList(classes));
         cbClass.getStyleClass().add("combo-box");
@@ -225,8 +225,8 @@ public class TeacherScenes {
                 new Alert(Alert.AlertType.WARNING, "Vui lòng chọn lớp học phần.").show();
                 return;
             }
-            navigator.getDao().lockGrades(sel.getId());
-            table.setItems(FXCollections.observableArrayList(navigator.getDao().getGradesByClass(sel.getId())));
+            navigator.getTeacherController().lockGrades(sel.getId());
+            table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getGradesByClass(sel.getId())));
             new Alert(Alert.AlertType.INFORMATION, "Đã khóa điểm lớp " + sel.getMaLhp()).show();
         });
 
@@ -241,14 +241,14 @@ public class TeacherScenes {
         cbClass.setOnAction(e -> {
             LopHocPhan sel = cbClass.getValue();
             if (sel != null) {
-                table.setItems(FXCollections.observableArrayList(navigator.getDao().getGradesByClass(sel.getId())));
+                table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getGradesByClass(sel.getId())));
             }
         });
         if (!classes.isEmpty()) {
             cbClass.getSelectionModel().selectFirst();
             LopHocPhan first = cbClass.getValue();
             if (first != null) {
-                table.setItems(FXCollections.observableArrayList(navigator.getDao().getGradesByClass(first.getId())));
+                table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getGradesByClass(first.getId())));
             }
         }
 
@@ -272,8 +272,8 @@ public class TeacherScenes {
         Button btnLock = new Button("Khóa bảng điểm");
         btnLock.getStyleClass().add("btn-danger");
         btnLock.setOnAction(e -> {
-            navigator.getDao().lockGrades(lhp.getId());
-            table.setItems(FXCollections.observableArrayList(navigator.getDao().getGradesByClass(lhp.getId())));
+            navigator.getTeacherController().lockGrades(lhp.getId());
+            table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getGradesByClass(lhp.getId())));
             new Alert(Alert.AlertType.WARNING, "Đã khóa bảng điểm.").show();
         });
 
@@ -329,11 +329,90 @@ public class TeacherScenes {
         colLock.setCellValueFactory(c -> new SimpleStringProperty(
                 Boolean.TRUE.equals(c.getValue().getLocked()) ? "Đã khóa" : "Đang mở"));
 
-        table.getColumns().addAll(colMa, colSv, colMon, colQT, colThi, colTK, colChu, colLock);
+        TableColumn<Diem, Void> colAction = new TableColumn<>("Thao tac");
+        colAction.setPrefWidth(100);
+        colAction.setCellFactory(param -> new TableCell<>() {
+            private final Button btnEdit = new Button("Sua");
+            {
+                btnEdit.getStyleClass().add("btn-primary");
+                btnEdit.setStyle("-fx-padding: 4 10; -fx-font-size: 11px;");
+                btnEdit.setOnAction(e -> {
+                    Diem d = getTableView().getItems().get(getIndex());
+                    showGradeEditDialog(navigator, d, table);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
+                Diem d = getTableView().getItems().get(getIndex());
+                btnEdit.setDisable(Boolean.TRUE.equals(d.getLocked()));
+                setGraphic(btnEdit);
+            }
+        });
+
+        table.getColumns().addAll(colMa, colSv, colMon, colQT, colThi, colTK, colChu, colLock, colAction);
         if (lhp != null) {
-            table.setItems(FXCollections.observableArrayList(navigator.getDao().getGradesByClass(lhp.getId())));
+            table.setItems(FXCollections.observableArrayList(navigator.getTeacherController().getGradesByClass(lhp.getId())));
         }
         return table;
+    }
+
+    private static void showGradeEditDialog(SceneNavigator navigator, Diem d, TableView<Diem> table) {
+        if (Boolean.TRUE.equals(d.getLocked())) {
+            new Alert(Alert.AlertType.WARNING, "Bang diem da khoa, khong the sua.").show();
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Sua diem");
+        dialog.setHeaderText(studentCode(d) + " - " + d.getSinhVien().getHoTen());
+
+        TextField txtQt = new TextField(String.format("%.1f", d.getDiemQT()));
+        TextField txtThi = new TextField(String.format("%.1f", d.getDiemThi()));
+        txtQt.getStyleClass().add("text-field");
+        txtThi.getStyleClass().add("text-field");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(12);
+        grid.setVgap(12);
+        grid.setPadding(new Insets(10));
+        grid.addRow(0, new Label("Diem QT (0-10):"), txtQt);
+        grid.addRow(1, new Label("Diem thi (0-10):"), txtThi);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result != ButtonType.OK) {
+                return;
+            }
+            Double qt = parseGrade(txtQt.getText(), "Diem QT");
+            Double thi = parseGrade(txtThi.getText(), "Diem thi");
+            if (qt == null || thi == null) {
+                return;
+            }
+            commitGrade(navigator, d, qt, thi, table);
+            new Alert(Alert.AlertType.INFORMATION, "Da cap nhat diem.").show();
+        });
+    }
+
+    private static Double parseGrade(String raw, String label) {
+        try {
+            double value = Double.parseDouble(raw.trim().replace(",", "."));
+            if (value < 0 || value > 10) {
+                new Alert(Alert.AlertType.ERROR, label + " phai nam trong khoang 0-10.").show();
+                return null;
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, label + " phai la so.").show();
+            return null;
+        }
     }
 
     private static void commitGrade(SceneNavigator navigator, Diem d, Double qt, Double thi, TableView<Diem> table) {
@@ -345,7 +424,7 @@ public class TeacherScenes {
         if (qt != null) d.setDiemQT(Math.min(10, Math.max(0, qt)));
         if (thi != null) d.setDiemThi(Math.min(10, Math.max(0, thi)));
         d.tinhDiem();
-        navigator.getDao().updateGrade(d);
+        navigator.getTeacherController().updateGrade(d);
         table.refresh();
     }
 

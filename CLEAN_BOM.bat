@@ -11,6 +11,6 @@ powershell -ExecutionPolicy Bypass -Command "$utf8NoBom = New-Object System.Text
 
 echo.
 echo ==========================================================
-echo   DA LOAI BO BOM - BAN CO THE BIEN DICH DU AN NGAY!
+echo   DA LOAI BO BOM - CO THE BIEN DICH DU AN NGAY!
 echo ==========================================================
 pause

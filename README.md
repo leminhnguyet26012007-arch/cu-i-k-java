@@ -1,121 +1,233 @@
-# He thong Quan ly Sinh vien - Java Desktop Client/Server
+# He thong Quan ly Sinh vien - JavaFX Desktop MVC
 
-Ung dung dung mo hinh Client/Server tach biet:
+Day la ung dung quan ly sinh vien viet bang JavaFX theo mo hinh MVC. Du an da duoc chuyen sang ung dung desktop, khong con giao dien web, Spring MVC Controller, Thymeleaf template hay HTTP browser UI.
 
-- `ServerMain`: chay server Spring Boot + TCP Socket, ket noi Supabase va thao tac database.
-- `Main`: chay client JavaFX desktop, chi hien thi UI va gui request den server.
+## Cong nghe
 
-Client khong ket noi truc tiep database.
+- Java 17+
+- JavaFX
+- Maven
+- JDBC
+- H2 local database mac dinh
+- PostgreSQL/Supabase tuy chon qua `config.properties`
+- BCrypt cho mat khau
+- AES cho thong tin nhay cam nhu email/SDT
 
-## Cau truc chinh
-
-Client:
-- UI Layer: `src/main/java/com/example/dean12/desktop`
-- Client Service Layer: `DesktopDao`
-- DTO/Model: `src/main/java/com/example/dean12/model`
-
-Server:
-- Socket/Handler: `TcpSocketServer`
-- Business dispatch: `handleRequest`
-- DAO/Repository: `ServerDao`, cac repository Spring
-- Security: BCrypt cho password, AES cho email/SDT
-- Database: Supabase PostgreSQL
-
-## Cach chay trong IntelliJ
-
-Chay dung thu tu sau:
-
-1. Mo file:
+## Mo hinh MVC
 
 ```text
-src/main/java/com/example/dean12/ServerMain.java
+src/main/java/com/example/dean12/model
 ```
 
-Bam nut Run mau xanh canh `main`.
-
-Khi server chay dung, console se co cac dong tuong tu:
+Chua cac lop model/entity: `User`, `SinhVien`, `GiangVien`, `MonHoc`, `LopHocPhan`, `DangKyHoc`, `Diem`, `Attendance`, `Feedback`, `ThongBao`, `HocPhi`.
 
 ```text
-[TCP Server] Server listening on port 9000
-Web: http://localhost:8081/login
+src/main/java/com/example/dean12/desktop/view
 ```
 
-Chi can thay dong `[TCP Server] Server listening on port 9000` la co the chay client `Main`. Khong can doi seed du lieu moi lan mo server.
+Chua cac man hinh JavaFX:
 
-2. Khong tat server. Tiep tuc mo file:
+- `LoginSceneFactory`
+- `AdminScenes`, `AdminAdvancedScenes`
+- `TeacherScenes`, `TeacherAdvancedScenes`
+- `StudentScenes`, `StudentAdvancedScenes`
+
+```text
+src/main/java/com/example/dean12/desktop/controller
+```
+
+Chua controller desktop:
+
+- `LoginController`: xu ly dang nhap
+- `AdminController`: quan ly sinh vien, mon hoc, lop hoc phan, tai khoan, thong bao, cau hinh
+- `TeacherController`: lop phu trach, diem danh, nhap diem, khoa diem, ho so giang vien
+- `StudentController`: thoi khoa bieu, diem, hoc phi, dang ky hoc phan, phan hoi, ho so sinh vien
+- `SceneNavigator`: dieu huong man hinh JavaFX va giu thong tin user hien tai
+
+```text
+src/main/java/com/example/dean12/desktop/data/DesktopDao.java
+```
+
+Tang DAO cho desktop, noi controller voi tang du lieu.
+
+```text
+src/main/java/com/example/dean12/desktop/network/ServerDao.java
+```
+
+Xu ly JDBC, tao schema, seed du lieu mau va thao tac database.
+
+## Chuc nang chinh
+
+### Admin
+
+- Quan ly sinh vien
+- Quan ly mon hoc
+- Quan ly lop hoc phan
+- Quan ly tai khoan
+- Khoa/mo khoa tai khoan
+- Tao thong bao
+- Cau hinh hoc ky, nam hoc, hoc phi/tin chi
+- Xuat/nhap danh sach sinh vien bang XML
+- Xem thong ke tong quan
+
+### Giang vien
+
+- Xem lop hoc phan phu trach
+- Diem danh sinh vien
+- Nhap diem qua bang diem
+- Sua diem bang nut `Sua` tung dong khi bang diem chua khoa
+- Khoa bang diem
+- Gui thong bao theo lop
+- Upload thong tin tai lieu
+- Cap nhat ho so giang vien
+
+### Sinh vien
+
+- Xem tong quan hoc tap
+- Xem thoi khoa bieu
+- Xem bang diem
+- Dang ky hoc phan
+- Xem/thanh toan hoc phi
+- Gui phan hoi/don tu
+- Xem thong bao
+- Cap nhat ho so ca nhan
+
+## Cach chay ung dung desktop
+
+Chay file:
+
+```text
+RUN_DESKTOP.bat
+```
+
+Hoac trong IntelliJ IDEA chay:
 
 ```text
 src/main/java/com/example/dean12/Main.java
 ```
 
-Bam nut Run mau xanh canh `main`.
+Ung dung desktop se tu tao schema, nap du lieu mau neu can va dang nhap truc tiep bang database local mac dinh.
 
-File `Main` se mo giao dien JavaFX desktop.
-
-## Dang nhap
-
-Tai khoan mau:
+## Tai khoan mau
 
 ```text
 admin / 123
-gv01 / 123
-sv01 / 123
+gv01  / 123
+sv01  / 123
 ```
 
-## Giai thich cac cong
+Co san them:
 
-- `http://localhost:8081/login`: giao dien web Spring Boot. Mo bang browser duoc.
-- `localhost:9000`: TCP Socket server cho JavaFX desktop. Day khong phai trang login web.
+```text
+gv01 -> gv05
+sv01 -> sv60
+```
 
-Neu mo `http://localhost:9000/` bang browser, no chi hien trang trang thai server. Desktop client moi la noi dang nhap qua port 9000.
+Mat khau mac dinh: `123`.
 
-## Cau hinh Supabase
+## Kiem tra dang nhap
+
+Chay:
+
+```powershell
+mvnw -Pverify-login compile exec:java
+```
+
+Neu thanh cong se thay:
+
+```text
+admin OK (ADMIN)
+gv01 OK (TEACHER)
+sv01 OK (STUDENT)
+```
+
+## Cau hinh database
+
+Mac dinh ung dung dung H2 local:
+
+```properties
+database.url=jdbc:h2:file:./database/school_db;MODE=PostgreSQL
+database.username=sa
+database.password=
+```
 
 File cau hinh:
 
 ```text
 config.properties
 src/main/resources/config.properties
-src/main/resources/application.properties
 ```
 
-Database hien dang tro den Supabase project:
+Neu muon dung PostgreSQL/Supabase:
+
+```properties
+database.url=jdbc:postgresql://host:5432/postgres?sslmode=require
+database.username=postgres
+database.password=your_password
+```
+
+## TCP server tuy chon
+
+Ung dung desktop hien khong bat buoc chay `ServerMain`.
+
+`ServerMain` chi dung khi can test TCP socket rieng:
 
 ```text
-upagdhbrgkkbkxadzsao
+START_SERVER.bat
 ```
 
-Du lieu mau da nap:
+Mac dinh TCP server dung port:
 
-- 66 users
-- 5 giang vien
-- 60 sinh vien
-- 12 mon hoc
-- 15 lop hoc phan
-- 300 dang ky hoc
-- 300 diem
+```properties
+server.port=9000
+```
 
-## Script tuy chon
-
-Neu khong muon bam Run trong IntelliJ, co the dung:
+Neu gap loi:
 
 ```text
-START_SERVER.bat    chay server
-RUN_DESKTOP.bat     chay client
-SEED_SUPABASE.bat   nap lai du lieu mau khi can, khong chay moi lan start server
-VERIFY_SUPABASE.bat kiem tra so dong tren Supabase
+Address already in use: bind
 ```
 
-## Build JAR
+thi port `9000` dang bi tien trinh khac giu. Co the dung PowerShell:
 
 ```powershell
-cmd /c mvnw.cmd clean -DskipTests package
+Get-NetTCPConnection -LocalPort 9000 | Select-Object LocalAddress,LocalPort,State,OwningProcess
+Stop-Process -Id <PID>
 ```
 
-File build:
+Hoac doi port trong `config.properties`:
+
+```properties
+server.port=9001
+```
+
+## Script
 
 ```text
-target/dean12-1.0.0.jar
+RUN_DESKTOP.bat      Chay JavaFX desktop client
+START_SERVER.bat     Chay TCP server tuy chon
+SEED_SUPABASE.bat    Nap du lieu mau vao database dang cau hinh
+VERIFY_SUPABASE.bat  Kiem tra so dong database dang cau hinh
+CLEAN_BOM.bat        Xu ly file encoding/BOM neu can
 ```
 
-`target` la thu muc Maven tu sinh khi build/chay. Co the xoa, Maven se tao lai.
+## Build
+
+```powershell
+mvnw clean compile
+```
+
+Hoac:
+
+```powershell
+mvnw clean package
+```
+
+Thu muc `target/` la output cua Maven va khong can day len GitHub.
+
+## Ghi chu
+
+- Khong con thu muc `templates`.
+- Khong con controller Spring Web trong package `controller`.
+- Khong con `application.properties` cho Spring Boot web app.
+- File database local H2 trong `database/*.mv.db` duoc ignore, khong day len GitHub.

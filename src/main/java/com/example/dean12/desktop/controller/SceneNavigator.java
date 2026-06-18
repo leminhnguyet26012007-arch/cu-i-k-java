@@ -1,5 +1,6 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.controller;
+import com.example.dean12.desktop.data.DesktopDao;
+import com.example.dean12.desktop.view.*;
 import com.example.dean12.model.LopHocPhan;
 import com.example.dean12.model.SinhVien;
 import com.example.dean12.model.User;
@@ -18,6 +19,10 @@ public class SceneNavigator {
 
     private final Stage primaryStage;
     private final DesktopDao dao;
+    private final LoginController loginController;
+    private final AdminController adminController;
+    private final TeacherController teacherController;
+    private final StudentController studentController;
     private User currentUser;
     private SinhVien currentStudent;
     private com.example.dean12.model.GiangVien currentTeacher;
@@ -25,9 +30,16 @@ public class SceneNavigator {
     public SceneNavigator(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.dao = new DesktopDao();
+        this.loginController = new LoginController(dao);
+        this.adminController = new AdminController(dao);
+        this.teacherController = new TeacherController(dao);
+        this.studentController = new StudentController(dao);
     }
 
-    public DesktopDao getDao() { return dao; }
+    public LoginController getLoginController() { return loginController; }
+    public AdminController getAdminController() { return adminController; }
+    public TeacherController getTeacherController() { return teacherController; }
+    public StudentController getStudentController() { return studentController; }
     public User getCurrentUser() { return currentUser; }
     public Stage getPrimaryStage() { return primaryStage; }
     public SinhVien getCurrentStudent() { return currentStudent; }
@@ -180,7 +192,7 @@ public class SceneNavigator {
 
     private BorderPane teacherLayout(String activeMenu) {
         if (currentTeacher == null && currentUser != null) {
-            currentTeacher = dao.getTeacherByUsername(currentUser.getUsername());
+            currentTeacher = teacherController.getTeacherByUsername(currentUser.getUsername());
         }
         BorderPane root = new BorderPane();
         String name = currentTeacher != null ? currentTeacher.getHoTen() : currentUser.getUsername();
@@ -221,7 +233,7 @@ public class SceneNavigator {
     }
 
     public void showTeacherDashboard() {
-        currentTeacher = dao.getTeacherByUsername(currentUser.getUsername());
+        currentTeacher = teacherController.getTeacherByUsername(currentUser.getUsername());
         BorderPane root = teacherLayout("HOME");
         ScrollPane scroll = new ScrollPane(TeacherScenes.createHomeContent(this, currentUser.getUsername()));
         scroll.setFitToWidth(true);
@@ -248,10 +260,10 @@ public class SceneNavigator {
 
     public void showTeacherProfile() {
         if (currentTeacher == null) {
-            currentTeacher = dao.getTeacherByUsername(currentUser.getUsername());
+            currentTeacher = teacherController.getTeacherByUsername(currentUser.getUsername());
         }
         BorderPane root = teacherLayout("PROFILE");
-        ScrollPane scroll = new ScrollPane(TeacherAdvancedScenes.createProfileView(currentTeacher));
+        ScrollPane scroll = new ScrollPane(TeacherAdvancedScenes.createProfileView(this, currentTeacher));
         scroll.setFitToWidth(true);
         root.setCenter(scroll);
         primaryStage.setScene(createStyledScene(root));
@@ -281,7 +293,7 @@ public class SceneNavigator {
 
     private BorderPane studentLayout(String activeMenu) {
         if (currentStudent == null && currentUser != null) {
-            currentStudent = dao.getStudentByUsername(currentUser.getUsername());
+            currentStudent = studentController.getStudentByUsername(currentUser.getUsername());
         }
         BorderPane root = new BorderPane();
         String name = currentStudent != null ? currentStudent.getHoTen() : currentUser.getUsername();
@@ -332,9 +344,9 @@ public class SceneNavigator {
     }
 
     public void showStudentDashboard() {
-        currentStudent = dao.getStudentByUsername(currentUser.getUsername());
+        currentStudent = studentController.getStudentByUsername(currentUser.getUsername());
         if (currentStudent == null) {
-            BorderPane err = new BorderPane(new Label("Không tìm thấy hồ sơ sinh viên. Chạy lại ServerMain để nạp dữ liệu mẫu."));
+            BorderPane err = new BorderPane(new Label("Không tìm thấy hồ sơ sinh viên. Chạy START_SERVER.bat để nạp dữ liệu mẫu."));
             primaryStage.setScene(createStyledScene(err));
             return;
         }
@@ -388,7 +400,7 @@ public class SceneNavigator {
     public void showStudentNotifications(SinhVien sv) {
         currentStudent = sv;
         BorderPane root = studentLayout("NOTI");
-        ScrollPane scroll = new ScrollPane(StudentAdvancedScenes.createNotificationView(sv));
+        ScrollPane scroll = new ScrollPane(StudentAdvancedScenes.createNotificationView(this, sv));
         scroll.setFitToWidth(true);
         root.setCenter(scroll);
         primaryStage.setScene(createStyledScene(root));
@@ -397,7 +409,7 @@ public class SceneNavigator {
     public void showStudentProfile(SinhVien sv) {
         currentStudent = sv;
         BorderPane root = studentLayout("PROFILE");
-        ScrollPane scroll = new ScrollPane(StudentAdvancedScenes.createProfileView(sv));
+        ScrollPane scroll = new ScrollPane(StudentAdvancedScenes.createProfileView(this, sv));
         scroll.setFitToWidth(true);
         root.setCenter(scroll);
         primaryStage.setScene(createStyledScene(root));

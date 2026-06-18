@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.SinhVien;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -20,7 +20,7 @@ public class StudentAdvancedScenes {
         Label title = new Label("Thanh toán học phí");
         title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
-        String[] info = navigator.getDao().getTuitionInfo(sv.getMaSV());
+        String[] info = navigator.getStudentController().getTuitionInfo(sv.getMaSV());
         int credits = Integer.parseInt(info[0]);
         long rate = Long.parseLong(info[1]);
         long total = Long.parseLong(info[2]);
@@ -60,7 +60,7 @@ public class StudentAdvancedScenes {
             confirm.setContentText("Phương thức: " + cbMethod.getValue() + "\nBạn xác nhận đã thanh toán?");
             confirm.showAndWait().ifPresent(btn -> {
                 if (btn == ButtonType.OK) {
-                    navigator.getDao().payTuition(sv.getMaSV());
+                    navigator.getStudentController().payTuition(sv.getMaSV());
                     sv.setTuitionPaid(true);
                     lblStatus.setText("Đã thanh toán thành công!");
                     lblStatus.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #16a34a;");
@@ -109,7 +109,7 @@ public class StudentAdvancedScenes {
         return l;
     }
 
-    public static VBox createNotificationView(SinhVien sv) {
+    public static VBox createNotificationView(SceneNavigator navigator, SinhVien sv) {
         VBox root = new VBox(20);
         root.setPadding(new Insets(25));
         Label title = new Label("Thông báo");
@@ -117,11 +117,10 @@ public class StudentAdvancedScenes {
 
         ListView<String> listView = new ListView<>();
         listView.setPrefHeight(400);
-        DesktopDao dao = new DesktopDao();
-        for (String[] n : dao.getNotifications("STUDENT", "ALL")) {
+                for (String[] n : navigator.getStudentController().getNotifications("STUDENT", "ALL")) {
             listView.getItems().add("[" + n[2] + "] " + n[0] + ": " + n[1]);
         }
-        for (String[] n : dao.getNotifications("ALL", "")) {
+        for (String[] n : navigator.getStudentController().getNotifications("ALL", "")) {
             listView.getItems().add("[TOÀN TRƯỜNG] " + n[0] + ": " + n[1]);
         }
         if (listView.getItems().isEmpty()) {
@@ -131,7 +130,7 @@ public class StudentAdvancedScenes {
         return root;
     }
 
-    public static VBox createProfileView(SinhVien sv) {
+    public static VBox createProfileView(SceneNavigator navigator, SinhVien sv) {
         VBox root = new VBox(20);
         root.setPadding(new Insets(25));
         Label title = new Label("Hồ sơ cá nhân");
@@ -154,7 +153,7 @@ public class StudentAdvancedScenes {
         Button btnUpdate = new Button("Lưu thay đổi");
         btnUpdate.getStyleClass().add("btn-primary");
         btnUpdate.setOnAction(e -> {
-            new DesktopDao().updateStudentProfile(sv.getMaSV(), txtEmail.getText(), txtSdt.getText());
+            navigator.getStudentController().updateStudentProfile(sv.getMaSV(), txtEmail.getText(), txtSdt.getText());
             sv.setEmail(txtEmail.getText());
             sv.setSdt(txtSdt.getText());
             new Alert(Alert.AlertType.INFORMATION, "Đã lưu hồ sơ!").show();
@@ -210,7 +209,7 @@ public class StudentAdvancedScenes {
                 btn.getStyleClass().add("btn-success");
                 btn.setOnAction(e -> {
                     com.example.dean12.model.LopHocPhan lhp = getTableView().getItems().get(getIndex());
-                    String result = navigator.getDao().registerClass(sv.getMaSV(), lhp.getId());
+                    String result = navigator.getStudentController().registerClass(sv.getMaSV(), lhp.getId());
                     Alert a = new Alert(result.contains("thành công") ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR);
                     a.setContentText(result);
                     a.show();
@@ -228,7 +227,7 @@ public class StudentAdvancedScenes {
         VBox.setVgrow(table, Priority.ALWAYS);
 
         btnSearch.setOnAction(e -> {
-            List<com.example.dean12.model.LopHocPhan> list = navigator.getDao().getAvailableClassesForRegistration(txtSearch.getText());
+            List<com.example.dean12.model.LopHocPhan> list = navigator.getStudentController().getAvailableClassesForRegistration(txtSearch.getText());
             table.setItems(javafx.collections.FXCollections.observableArrayList(list));
         });
         btnSearch.fire();

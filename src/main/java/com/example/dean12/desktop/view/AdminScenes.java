@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.SinhVien;
 import com.example.dean12.model.MonHoc;
 import com.example.dean12.model.LopHocPhan;
@@ -96,7 +96,7 @@ public class AdminScenes {
                     confirm.setHeaderText(null);
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.YES) {
-                            navigator.getDao().deleteStudent(sv.getMaSV());
+                            navigator.getAdminController().deleteStudent(sv.getMaSV());
                             refreshTable(navigator, table, txtSearch);
                             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa sinh viên!");
                         }
@@ -150,7 +150,7 @@ public class AdminScenes {
             }
 
             // Check duplicate ID locally first
-            for (SinhVien ex : navigator.getDao().getAllStudents()) {
+            for (SinhVien ex : navigator.getAdminController().getAllStudents()) {
                 if (ex.getMaSV().equalsIgnoreCase(id)) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Trùng Lặp", "Mã sinh viên này đã tồn tại trong hệ thống!");
                     return;
@@ -164,7 +164,7 @@ public class AdminScenes {
             sv.setEmail(email);
             sv.setSdt(phone);
             
-            navigator.getDao().createStudent(sv, id.toLowerCase(), "123");
+            navigator.getAdminController().createStudent(sv, id.toLowerCase(), "123");
             txtId.clear(); txtName.clear(); txtClass.clear(); txtEmail.clear(); txtPhone.clear();
             refreshTable(navigator, table, txtSearch);
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã thêm sinh viên mới! Mật khẩu mặc định là: 123");
@@ -173,7 +173,7 @@ public class AdminScenes {
         // XML Export action
         btnExport.setOnAction(e -> {
             try {
-                String xml = navigator.getDao().exportStudentsToXml();
+                String xml = navigator.getAdminController().exportStudentsToXml();
                 if (xml == null) {
                     showAlert(Alert.AlertType.ERROR, "Thất bại", "Không có dữ liệu sinh viên để xuất!");
                     return;
@@ -205,7 +205,7 @@ public class AdminScenes {
             if (file != null) {
                 try {
                     String xmlData = new String(Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8);
-                    String result = navigator.getDao().importStudentsFromXml(xmlData);
+                    String result = navigator.getAdminController().importStudentsFromXml(xmlData);
                     refreshTable(navigator, table, txtSearch);
                     if (result.contains("thành công")) {
                         showAlert(Alert.AlertType.INFORMATION, "Kết quả Nhập XML", result);
@@ -226,7 +226,7 @@ public class AdminScenes {
     }
     
     private static void refreshTable(SceneNavigator navigator, TableView<SinhVien> table, TextField txtSearch) {
-        ObservableList<SinhVien> masterData = FXCollections.observableArrayList(navigator.getDao().getAllStudents());
+        ObservableList<SinhVien> masterData = FXCollections.observableArrayList(navigator.getAdminController().getAllStudents());
         
         // 1. Wrap the ObservableList in a FilteredList
         FilteredList<SinhVien> filteredData = new FilteredList<>(masterData, p -> true);
@@ -309,7 +309,7 @@ public class AdminScenes {
                     return;
                 }
 
-                navigator.getDao().updateStudent(sv.getMaSV(), name, lop, email, phone);
+                navigator.getAdminController().updateStudent(sv.getMaSV(), name, lop, email, phone);
                 refreshTable(navigator, table, txtSearch);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật thông tin sinh viên!");
             }
@@ -370,7 +370,7 @@ public class AdminScenes {
                     confirm.setHeaderText(null);
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.YES) {
-                            navigator.getDao().deleteCourse(mh.getMaMH());
+                            navigator.getAdminController().deleteCourse(mh.getMaMH());
                             refreshCourseTable(navigator, table, txtSearch);
                             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa môn học!");
                         }
@@ -419,7 +419,7 @@ public class AdminScenes {
             }
 
             // Check duplicate course id
-            for (MonHoc ex : navigator.getDao().getAllCourses()) {
+            for (MonHoc ex : navigator.getAdminController().getAllCourses()) {
                 if (ex.getMaMH().equalsIgnoreCase(id)) {
                     showAlert(Alert.AlertType.ERROR, "Lỗi Trùng Lặp", "Mã môn học này đã tồn tại!");
                     return;
@@ -431,7 +431,7 @@ public class AdminScenes {
             mh.setTenMH(name);
             mh.setSoTinChi(credits);
             
-            navigator.getDao().createCourse(mh);
+            navigator.getAdminController().createCourse(mh);
             txtId.clear(); txtName.clear(); txtCredits.clear();
             refreshCourseTable(navigator, table, txtSearch);
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã thêm môn học thành công!");
@@ -444,7 +444,7 @@ public class AdminScenes {
     }
 
     private static void refreshCourseTable(SceneNavigator navigator, TableView<MonHoc> table, TextField txtSearch) {
-        ObservableList<MonHoc> masterData = FXCollections.observableArrayList(navigator.getDao().getAllCourses());
+        ObservableList<MonHoc> masterData = FXCollections.observableArrayList(navigator.getAdminController().getAllCourses());
         FilteredList<MonHoc> filteredData = new FilteredList<>(masterData, p -> true);
         
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -507,7 +507,7 @@ public class AdminScenes {
                     return;
                 }
 
-                navigator.getDao().updateCourse(mh.getMaMH(), name, credits);
+                navigator.getAdminController().updateCourse(mh.getMaMH(), name, credits);
                 refreshCourseTable(navigator, table, txtSearch);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật môn học!");
             }
@@ -578,7 +578,7 @@ public class AdminScenes {
                     confirm.setHeaderText(null);
                     confirm.showAndWait().ifPresent(response -> {
                         if (response == ButtonType.YES) {
-                            navigator.getDao().deleteClass(lhp.getId());
+                            navigator.getAdminController().deleteClass(lhp.getId());
                             refreshClassTable(navigator, table, txtSearch);
                             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa lớp học!");
                         }
@@ -600,7 +600,7 @@ public class AdminScenes {
         
         ComboBox<MonHoc> cbCourse = new ComboBox<>(); cbCourse.getStyleClass().add("combo-box");
         cbCourse.setPromptText("Chọn môn học");
-        cbCourse.setItems(FXCollections.observableArrayList(navigator.getDao().getAllCourses()));
+        cbCourse.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllCourses()));
         cbCourse.setConverter(new javafx.util.StringConverter<>() {
             public String toString(MonHoc o) { return o == null ? "" : o.getMaMH() + " - " + o.getTenMH(); }
             public MonHoc fromString(String s) { return null; }
@@ -608,7 +608,7 @@ public class AdminScenes {
         
         ComboBox<GiangVien> cbTeacher = new ComboBox<>(); cbTeacher.getStyleClass().add("combo-box");
         cbTeacher.setPromptText("Chọn giảng viên");
-        cbTeacher.setItems(FXCollections.observableArrayList(navigator.getDao().getAllTeachers()));
+        cbTeacher.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllTeachers()));
         cbTeacher.setConverter(new javafx.util.StringConverter<>() {
             public String toString(GiangVien o) { return o == null ? "" : o.getHoTen(); }
             public GiangVien fromString(String s) { return null; }
@@ -644,7 +644,7 @@ public class AdminScenes {
                 lhp.setPhongHoc(phong);
                 lhp.setLichHoc(lich);
                 
-                navigator.getDao().createClass(lhp);
+                navigator.getAdminController().createClass(lhp);
                 
                 txtId.clear(); txtRoom.clear(); txtSch.clear();
                 cbCourse.setValue(null); cbTeacher.setValue(null);
@@ -662,7 +662,7 @@ public class AdminScenes {
     }
     
     private static void refreshClassTable(SceneNavigator navigator, TableView<LopHocPhan> table, TextField txtSearch) {
-        ObservableList<LopHocPhan> masterData = FXCollections.observableArrayList(navigator.getDao().getAllClasses());
+        ObservableList<LopHocPhan> masterData = FXCollections.observableArrayList(navigator.getAdminController().getAllClasses());
         FilteredList<LopHocPhan> filteredData = new FilteredList<>(masterData, p -> true);
         
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -699,7 +699,7 @@ public class AdminScenes {
         TextField txtSchedule = new TextField(lhp.getLichHoc()); txtSchedule.getStyleClass().add("text-field");
         
         ComboBox<GiangVien> cbTeacher = new ComboBox<>(); cbTeacher.getStyleClass().add("combo-box");
-        cbTeacher.setItems(FXCollections.observableArrayList(navigator.getDao().getAllTeachers()));
+        cbTeacher.setItems(FXCollections.observableArrayList(navigator.getAdminController().getAllTeachers()));
         
         // Match current teacher
         if (lhp.getGiangVien() != null) {
@@ -744,7 +744,7 @@ public class AdminScenes {
                     return;
                 }
 
-                navigator.getDao().updateClass(lhp.getId(), maLhp, room, sched, maGV);
+                navigator.getAdminController().updateClass(lhp.getId(), maLhp, room, sched, maGV);
                 refreshClassTable(navigator, table, txtSearch);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật lớp học phần!");
             }

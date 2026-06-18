@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.LopHocPhan;
 import com.example.dean12.model.GiangVien;
 import javafx.geometry.Insets;
@@ -9,8 +9,6 @@ import javafx.stage.FileChooser;
 import java.io.File;
 
 public class TeacherAdvancedScenes {
-
-    private static final DesktopDao dao = new DesktopDao();
 
     public static VBox createClassManagerView(SceneNavigator navigator, LopHocPhan lhp) {
         VBox root = new VBox(20);
@@ -22,8 +20,8 @@ public class TeacherAdvancedScenes {
         // Tabs for different features
         TabPane tabs = new TabPane();
         
-        Tab tabMaterial = new Tab("Tài liệu học tập", createMaterialUploadContent(lhp));
-        Tab tabNoti = new Tab("Gửi thông báo", createClassNotificationContent(lhp));
+        Tab tabMaterial = new Tab("Tài liệu học tập", createMaterialUploadContent(navigator, lhp));
+        Tab tabNoti = new Tab("Gửi thông báo", createClassNotificationContent(navigator, lhp));
         
         tabMaterial.setClosable(false);
         tabNoti.setClosable(false);
@@ -37,7 +35,7 @@ public class TeacherAdvancedScenes {
         return root;
     }
     
-    private static VBox createMaterialUploadContent(LopHocPhan lhp) {
+    private static VBox createMaterialUploadContent(SceneNavigator navigator, LopHocPhan lhp) {
         VBox content = new VBox(15);
         content.setPadding(new Insets(15));
         
@@ -67,7 +65,7 @@ public class TeacherAdvancedScenes {
                 showAlert(Alert.AlertType.WARNING, "Thiếu thông tin");
                 return;
             }
-            dao.uploadMaterial(lhp.getId(), txtTitle.getText(), txtPath.getText());
+            navigator.getTeacherController().uploadMaterial(lhp.getId(), txtTitle.getText(), txtPath.getText());
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã upload tài liệu: " + txtTitle.getText());
             txtPath.clear();
             txtTitle.clear();
@@ -78,7 +76,7 @@ public class TeacherAdvancedScenes {
         return content;
     }
     
-    private static VBox createClassNotificationContent(LopHocPhan lhp) {
+    private static VBox createClassNotificationContent(SceneNavigator navigator, LopHocPhan lhp) {
         VBox content = new VBox(15);
         content.setPadding(new Insets(15));
         
@@ -99,7 +97,7 @@ public class TeacherAdvancedScenes {
                 return;
             }
             // Target Role = CLASS, Target ID = lhp ID
-            dao.createNotification(txtTitle.getText(), txtMsg.getText(), "CLASS", String.valueOf(lhp.getId()));
+            navigator.getTeacherController().createNotification(txtTitle.getText(), txtMsg.getText(), "CLASS", String.valueOf(lhp.getId()));
             showAlert(Alert.AlertType.INFORMATION, "Đã gửi", "Thông báo đã được gửi đến sinh viên lớp này.");
             txtTitle.clear();
             txtMsg.clear();
@@ -119,7 +117,7 @@ public class TeacherAdvancedScenes {
     private static void showAlert(Alert.AlertType type, String title) {
         showAlert(type, title, "");
     }
-    public static VBox createProfileView(GiangVien gv) {
+    public static VBox createProfileView(SceneNavigator navigator, GiangVien gv) {
         VBox root = new VBox(20);
         root.setPadding(new Insets(20));
         
@@ -142,7 +140,7 @@ public class TeacherAdvancedScenes {
         Button btnUpdate = new Button("Lưu Thay Đổi");
         btnUpdate.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white;");
         btnUpdate.setOnAction(e -> {
-            dao.updateTeacherProfile(gv.getMaGV(), txtEmail.getText(), txtSdt.getText());
+            navigator.getTeacherController().updateTeacherProfile(gv.getMaGV(), txtEmail.getText(), txtSdt.getText());
             gv.setEmail(txtEmail.getText());
             gv.setSdt(txtSdt.getText());
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật thông tin!");

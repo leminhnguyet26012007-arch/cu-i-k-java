@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -21,11 +21,11 @@ public class StudentScenes {
         Label welcome = new Label("Xin chào, " + sv.getHoTen());
         welcome.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
-        List<DangKyHoc> schedule = navigator.getDao().getStudentSchedule(sv.getMaSV());
-        List<Diem> grades = navigator.getDao().getStudentGrades(sv.getMaSV());
-        String[] tuition = navigator.getDao().getTuitionInfo(sv.getMaSV());
+        List<DangKyHoc> schedule = navigator.getStudentController().getStudentSchedule(sv.getMaSV());
+        List<Diem> grades = navigator.getStudentController().getStudentGrades(sv.getMaSV());
+        String[] tuition = navigator.getStudentController().getTuitionInfo(sv.getMaSV());
 
-        double[] gpaSummary = navigator.getDao().getStudentGpaSummary(sv.getMaSV());
+        double[] gpaSummary = navigator.getStudentController().getStudentGpaSummary(sv.getMaSV());
         double gpa = gpaSummary[0];
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
 
@@ -78,7 +78,7 @@ public class StudentScenes {
         TableColumn<DangKyHoc, String> colRoom = new TableColumn<>("Phòng");
         colRoom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getLopHocPhan().getPhongHoc()));
         table.getColumns().addAll(colMH, colLHP, colGV, colTime, colRoom);
-        table.setItems(FXCollections.observableArrayList(navigator.getDao().getStudentSchedule(sv.getMaSV())));
+        table.setItems(FXCollections.observableArrayList(navigator.getStudentController().getStudentSchedule(sv.getMaSV())));
 
         VBox box = new VBox(15, title, table);
         VBox.setVgrow(table, Priority.ALWAYS);
@@ -93,7 +93,7 @@ public class StudentScenes {
         Label title = new Label("BẢNG ĐIỂM — " + sv.getHoTen() + " (" + sv.getMaSV() + ")");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
-        double[] summary = navigator.getDao().getStudentGpaSummary(sv.getMaSV());
+        double[] summary = navigator.getStudentController().getStudentGpaSummary(sv.getMaSV());
         HBox stats = new HBox(20);
         stats.getChildren().addAll(
                 statCard(String.format("%.2f", summary[0]), "Điểm TB", "stat-card-blue"),
@@ -133,7 +133,7 @@ public class StudentScenes {
                 Boolean.TRUE.equals(c.getValue().getLocked()) ? "Đã khóa (chính thức)" : "Chưa khóa"));
 
         table.getColumns().addAll(colMH, colLHP, colTC, colQT, colThi, colTK, colChu, colTT);
-        table.setItems(FXCollections.observableArrayList(navigator.getDao().getStudentGrades(sv.getMaSV())));
+        table.setItems(FXCollections.observableArrayList(navigator.getStudentController().getStudentGrades(sv.getMaSV())));
 
         Label note = new Label("Điểm đã khóa là điểm chính thức do giảng viên công bố. Điểm chưa khóa có thể thay đổi.");
         note.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px;");
@@ -178,7 +178,7 @@ public class StudentScenes {
             fb.setLoaiDon(cbLoai.getValue());
             fb.setTieuDe(txtTieuDe.getText());
             fb.setNoiDung(txtNoiDung.getText());
-            navigator.getDao().createFeedback(fb);
+            navigator.getStudentController().createFeedback(fb);
             new Alert(Alert.AlertType.INFORMATION, "Gửi thành công!").show();
             navigator.showStudentDashboard();
         });

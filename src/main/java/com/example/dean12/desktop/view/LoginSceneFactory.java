@@ -1,5 +1,5 @@
-package com.example.dean12.desktop;
-
+package com.example.dean12.desktop.view;
+import com.example.dean12.desktop.controller.SceneNavigator;
 import com.example.dean12.model.User;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -67,7 +67,7 @@ public class LoginSceneFactory {
             Task<User> loginTask = new Task<>() {
                 @Override
                 protected User call() {
-                    return navigator.getDao().login(username, password);
+                    return navigator.getLoginController().login(username, password);
                 }
             };
 
@@ -75,7 +75,7 @@ public class LoginSceneFactory {
                 User user = loginTask.getValue();
                 loginBtn.setDisable(false);
                 if (user == null) {
-                    error.setText("Dang nhap that bai. Hay chay START_SERVER.bat va kiem tra tai khoan.");
+                    error.setText("Dang nhap that bai. Kiem tra tai khoan/mat khau hoac du lieu mau.");
                     return;
                 }
                 navigator.showDashboard(user);

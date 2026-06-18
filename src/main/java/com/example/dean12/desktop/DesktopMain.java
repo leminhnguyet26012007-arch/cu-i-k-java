@@ -1,5 +1,6 @@
 package com.example.dean12.desktop;
-
+import com.example.dean12.desktop.controller.SceneNavigator;
+import com.example.dean12.desktop.data.DesktopDao;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
