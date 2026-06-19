@@ -1,229 +1,258 @@
 package com.example.dean12.desktop.data;
 
-import com.example.dean12.desktop.network.ServerDao;
-import com.example.dean12.desktop.network.XmlUtil;
+import com.example.dean12.desktop.network.ConfigUtil;
+import com.example.dean12.desktop.network.Request;
+import com.example.dean12.desktop.network.Response;
 import com.example.dean12.model.*;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DesktopDao {
 
-    private final ServerDao dao = new ServerDao();
+    private Response sendRequest(Request req) {
+        String host = ConfigUtil.getProperty("server.host", "localhost");
+        int port = ConfigUtil.getIntProperty("server.port", 9000);
+        try (Socket socket = new Socket(host, port);
+             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
+
+            oos.flush();
+            oos.writeObject(req);
+            oos.flush();
+
+            Object obj = ois.readObject();
+            if (obj instanceof Response) {
+                return (Response) obj;
+            }
+            return new Response(false, "Dinh dang ket qua tra ve khong hop le");
+        } catch (Exception e) {
+            System.err.println("[Socket Client] Request error: " + e.getMessage());
+            return new Response(false, "Khong the ket noi den Server port " + port + ". Hay chay ServerMain truoc.");
+        }
+    }
 
     public void initializeDatabaseSchema() {
-        dao.initializeDatabaseSchema();
-        dao.seedSampleDataIfEmpty();
+        // ServerMain owns database schema initialization.
     }
 
     public void updateSystemConfig(String year, String semester, double tuition) {
-        dao.updateSystemConfig(year, semester, tuition);
+        sendRequest(new Request("UPDATE_SYSTEM_CONFIG", year, semester, tuition));
     }
 
     public String[] getSystemConfig() {
-        return dao.getSystemConfig();
+        Response res = sendRequest(new Request("GET_SYSTEM_CONFIG"));
+        return res.isSuccess() ? (String[]) res.getData() : new String[]{"2025-2026", "1", "500000"};
     }
 
     public void createNotification(String title, String content, String role, String targetId) {
-        dao.createNotification(title, content, role, targetId);
+        sendRequest(new Request("CREATE_NOTIFICATION", title, content, role, targetId));
     }
 
     public void createNotification(String title, String content, String role) {
-        dao.createNotification(title, content, role);
+        sendRequest(new Request("CREATE_NOTIFICATION", title, content, role));
     }
 
     public List<ThongBao> getAllNotifications() {
-        return dao.getAllNotifications();
+        Response res = sendRequest(new Request("GET_ALL_NOTIFICATIONS"));
+        return res.isSuccess() ? (List<ThongBao>) res.getData() : new ArrayList<>();
     }
 
     public List<String[]> getNotifications(String role, String classId) {
-        return dao.getNotifications(role, classId);
+        Response res = sendRequest(new Request("GET_NOTIFICATIONS", role, classId));
+        return res.isSuccess() ? (List<String[]>) res.getData() : new ArrayList<>();
     }
 
     public void payTuition(String maSV) {
-        dao.payTuition(maSV);
+        sendRequest(new Request("PAY_TUITION", maSV));
     }
 
     public User login(String username, String password) {
-        return dao.login(username, password);
+        Response res = sendRequest(new Request("LOGIN", username, password));
+        return res.isSuccess() ? (User) res.getData() : null;
     }
 
     public List<SinhVien> getAllStudents() {
-        return dao.getAllStudents();
+        Response res = sendRequest(new Request("GET_ALL_STUDENTS"));
+        return res.isSuccess() ? (List<SinhVien>) res.getData() : new ArrayList<>();
     }
 
     public void createStudent(SinhVien sv, String username, String password) {
-        dao.createStudent(sv, username, password);
+        sendRequest(new Request("CREATE_STUDENT", sv, username, password));
     }
 
     public void updateStudent(String maSV, String hoTen, String lop, String email, String sdt) {
-        dao.updateStudent(maSV, hoTen, lop, email, sdt);
+        sendRequest(new Request("UPDATE_STUDENT", maSV, hoTen, lop, email, sdt));
     }
 
     public void deleteStudent(String maSV) {
-        dao.deleteStudent(maSV);
+        sendRequest(new Request("DELETE_STUDENT", maSV));
     }
 
     public List<MonHoc> getAllCourses() {
-        return dao.getAllCourses();
+        Response res = sendRequest(new Request("GET_ALL_COURSES"));
+        return res.isSuccess() ? (List<MonHoc>) res.getData() : new ArrayList<>();
     }
 
     public void createCourse(MonHoc mh) {
-        dao.createCourse(mh);
+        sendRequest(new Request("CREATE_COURSE", mh));
     }
 
     public void updateCourse(String maMH, String tenMH, int soTinChi) {
-        dao.updateCourse(maMH, tenMH, soTinChi);
+        sendRequest(new Request("UPDATE_COURSE", maMH, tenMH, soTinChi));
     }
 
     public void deleteCourse(String maMH) {
-        dao.deleteCourse(maMH);
+        sendRequest(new Request("DELETE_COURSE", maMH));
     }
 
     public List<LopHocPhan> getAllClasses() {
-        return dao.getAllClasses();
+        Response res = sendRequest(new Request("GET_ALL_CLASSES"));
+        return res.isSuccess() ? (List<LopHocPhan>) res.getData() : new ArrayList<>();
     }
 
     public void createClass(LopHocPhan lhp) {
-        dao.createClass(lhp);
+        sendRequest(new Request("CREATE_CLASS", lhp));
     }
 
     public void updateClass(Long id, String maLhp, String phongHoc, String lichHoc, String maGV) {
-        dao.updateClass(id, maLhp, phongHoc, lichHoc, maGV);
+        sendRequest(new Request("UPDATE_CLASS", id, maLhp, phongHoc, lichHoc, maGV));
     }
 
     public void deleteClass(Long id) {
-        dao.deleteClass(id);
+        sendRequest(new Request("DELETE_CLASS", id));
     }
 
     public List<GiangVien> getAllTeachers() {
-        return dao.getAllTeachers();
+        Response res = sendRequest(new Request("GET_ALL_TEACHERS"));
+        return res.isSuccess() ? (List<GiangVien>) res.getData() : new ArrayList<>();
     }
 
     public List<LopHocPhan> getClassesByTeacher(String maGV) {
-        return dao.getClassesByTeacher(maGV);
+        Response res = sendRequest(new Request("GET_CLASSES_BY_TEACHER", maGV));
+        return res.isSuccess() ? (List<LopHocPhan>) res.getData() : new ArrayList<>();
     }
 
     public List<DangKyHoc> getStudentsInClass(Long lhpId) {
-        return dao.getStudentsInClass(lhpId);
+        Response res = sendRequest(new Request("GET_STUDENTS_IN_CLASS", lhpId));
+        return res.isSuccess() ? (List<DangKyHoc>) res.getData() : new ArrayList<>();
     }
 
     public void saveAttendance(Long lhpId, String maSV, Date date, boolean present) {
-        dao.saveAttendance(lhpId, maSV, date, present);
+        sendRequest(new Request("SAVE_ATTENDANCE", lhpId, maSV, date, present));
     }
 
     public List<Diem> getGradesByClass(Long lhpId) {
-        return dao.getGradesByClass(lhpId);
+        Response res = sendRequest(new Request("GET_GRADES_BY_CLASS", lhpId));
+        return res.isSuccess() ? (List<Diem>) res.getData() : new ArrayList<>();
     }
 
     public void updateGrade(Diem d) {
-        dao.updateGrade(d);
+        sendRequest(new Request("UPDATE_GRADE", d));
     }
 
     public void lockGrades(Long lhpId) {
-        dao.lockGrades(lhpId);
+        sendRequest(new Request("LOCK_GRADES", lhpId));
     }
 
     public SinhVien getStudentByUsername(String username) {
-        return dao.getStudentByUsername(username);
+        Response res = sendRequest(new Request("GET_STUDENT_BY_USERNAME", username));
+        return res.isSuccess() ? (SinhVien) res.getData() : null;
     }
 
     public List<DangKyHoc> getStudentSchedule(String maSV) {
-        return dao.getStudentSchedule(maSV);
+        Response res = sendRequest(new Request("GET_STUDENT_SCHEDULE", maSV));
+        return res.isSuccess() ? (List<DangKyHoc>) res.getData() : new ArrayList<>();
     }
 
     public GiangVien getTeacherByUsername(String username) {
-        return dao.getTeacherByUsername(username);
+        Response res = sendRequest(new Request("GET_TEACHER_BY_USERNAME", username));
+        return res.isSuccess() ? (GiangVien) res.getData() : null;
     }
 
     public void updateTeacherProfile(String maGV, String email, String sdt) {
-        dao.updateTeacherProfile(maGV, email, sdt);
+        sendRequest(new Request("UPDATE_TEACHER_PROFILE", maGV, email, sdt));
     }
 
     public void updateStudentProfile(String maSV, String email, String sdt) {
-        dao.updateStudentProfile(maSV, email, sdt);
+        sendRequest(new Request("UPDATE_STUDENT_PROFILE", maSV, email, sdt));
     }
 
     public List<LopHocPhan> getAvailableClassesForRegistration(String search) {
-        return dao.getAvailableClassesForRegistration(search);
+        Response res = sendRequest(new Request("GET_AVAILABLE_CLASSES_FOR_REGISTRATION", search));
+        return res.isSuccess() ? (List<LopHocPhan>) res.getData() : new ArrayList<>();
     }
 
     public String registerClass(String maSV, Long lhpId) {
-        return dao.registerClass(maSV, lhpId);
+        Response res = sendRequest(new Request("REGISTER_CLASS", maSV, lhpId));
+        return res.getMessage();
     }
 
     public void createUserAccount(String username, String password, String email, String role) {
-        dao.createUserAccount(username, password, email, role);
+        sendRequest(new Request("CREATE_USER_ACCOUNT", username, password, email, role));
     }
 
     public void deleteUserAccount(String username) {
-        dao.deleteUserAccount(username);
+        sendRequest(new Request("DELETE_USER_ACCOUNT", username));
     }
 
     public void lockUserAccount(String username) {
-        dao.lockUserAccount(username);
+        sendRequest(new Request("LOCK_USER_ACCOUNT", username));
     }
 
     public void unlockUserAccount(String username) {
-        dao.unlockUserAccount(username);
+        sendRequest(new Request("UNLOCK_USER_ACCOUNT", username));
     }
 
     public List<User> getAllUsers() {
-        return dao.getAllUsers();
+        Response res = sendRequest(new Request("GET_ALL_USERS"));
+        return res.isSuccess() ? (List<User>) res.getData() : new ArrayList<>();
     }
 
     public boolean isUserLocked(String username) {
-        return dao.isUserLocked(username);
+        Response res = sendRequest(new Request("IS_USER_LOCKED", username));
+        return res.isSuccess() ? (Boolean) res.getData() : false;
     }
 
     public List<Diem> getStudentGrades(String maSV) {
-        return dao.getStudentGrades(maSV);
+        Response res = sendRequest(new Request("GET_STUDENT_GRADES", maSV));
+        return res.isSuccess() ? (List<Diem>) res.getData() : new ArrayList<>();
     }
 
     public void createFeedback(Feedback fb) {
-        dao.createFeedback(fb);
+        sendRequest(new Request("CREATE_FEEDBACK", fb));
     }
 
     public SinhVien getStudentByProperties(String maSV) {
-        return dao.getStudentByProperties(maSV);
+        Response res = sendRequest(new Request("GET_STUDENT_BY_PROPERTIES", maSV));
+        return res.isSuccess() ? (SinhVien) res.getData() : null;
     }
 
     public String[] getTuitionInfo(String maSV) {
-        return dao.getTuitionInfo(maSV);
+        Response res = sendRequest(new Request("GET_TUITION_INFO", maSV));
+        return res.isSuccess() ? (String[]) res.getData() : new String[]{"0", "500000", "0", "false"};
     }
 
     public double[] getStudentGpaSummary(String maSV) {
-        return dao.getStudentGpaSummary(maSV);
+        Response res = sendRequest(new Request("GET_GPA_SUMMARY", maSV));
+        return res.isSuccess() ? (double[]) res.getData() : new double[]{0, 0, 0};
     }
 
     public String exportStudentsToXml() {
-        try {
-            return XmlUtil.exportStudentsToXml(dao.getAllStudents());
-        } catch (Exception e) {
-            return null;
-        }
+        Response res = sendRequest(new Request("EXPORT_STUDENTS_XML"));
+        return res.isSuccess() ? (String) res.getData() : null;
     }
 
     public String importStudentsFromXml(String xmlData) {
-        try {
-            List<SinhVien> students = XmlUtil.importStudentsFromXml(xmlData);
-            for (SinhVien sv : students) {
-                SinhVien existing = dao.getStudentByProperties(sv.getMaSV());
-                if (existing == null) {
-                    dao.createStudent(sv, sv.getMaSV().toLowerCase(), "123");
-                } else {
-                    dao.updateStudent(sv.getMaSV(), sv.getHoTen(), sv.getLop(), sv.getEmail(), sv.getSdt());
-                }
-            }
-            return "Nhap XML thanh cong. Da xu ly " + students.size() + " sinh vien.";
-        } catch (Exception e) {
-            return "Nhap XML that bai: " + e.getMessage();
-        }
+        Response res = sendRequest(new Request("IMPORT_STUDENTS_XML", xmlData));
+        return res.getMessage();
     }
 
     public void uploadMaterial(Long classId, String title, String path) {
-        dao.logActivity("TEACHER", "UPLOAD_MATERIAL", "SUCCESS",
-                "Class: " + classId + ", Title: " + title + ", Path: " + path);
+        sendRequest(new Request("UPLOAD_MATERIAL", classId, title, path));
     }
 }
